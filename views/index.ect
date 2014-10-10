@@ -56,7 +56,7 @@
 <div class="row">
   <div class="col-sm-6">
     <h3>Encoder/Decoder <small>인코딩/디코딩</small></h3>
-    <form name="encoder-form">
+    <form name="encoder-form" method="post">
     <div class="form-group">
       <label class="radio-inline">
       <input type="radio" name="encoding" value="utf8" checked="checked"/> UTF-8
@@ -64,13 +64,24 @@
       <label class="radio-inline">
       <input type="radio" name="encoding" value="euckr"/> EUC-KR
       </label>
+      <label class="radio-inline">
+      <input type="radio" name="encoding" value="binfile"/> Binary File
+      </label>
     </div>
     <div class="form-group">
-      <textarea class="form-control" name="from" rows="3" placeholder="From"></textarea>
+      <textarea class="form-control" id="encoder-from" name="from" rows="3" placeholder="From"></textarea>
+      <div id="encoder-from-file">
+        <div id="encoder-uploadify-display" style="border:1px solid #c8c8c8; padding:5px;">선택해주세요</div>
+        <div id="encoder-uploadify"></div>
+      </div>
+      <input type="hidden" id="encoder-from-file-path" name="from-file-path"/>
     </div>
     <div class="form-group">
       <label class="radio-inline">
       <input type="radio" name="type" value="url" checked="checked"/> URL
+      </label>
+      <label class="radio-inline">
+      <input type="radio" name="type" value="hex"/> HEX
       </label>
       <label class="radio-inline">
       <input type="radio" name="type" value="base64"/> BASE64
@@ -285,6 +296,17 @@
 
 <script type="text/javascript" src="/javascripts/jquery.clipboard.js"></script>
 <script type="text/javascript">
+var sizeformat = function(b) {
+    if (1024 * 1024 * 1024 < b)
+        return (b / (1024 * 1024 * 1024)).toFixed(2) + 'G';
+    else if (1024 * 1024 < b)
+        return (b / (1024 * 1024)).toFixed(2) + 'MB';
+    else if (1024 < b)
+        return parseInt(b / 1024) + 'KB';
+    else
+        return b;
+}
+
 // Link Shortener
 var linkshort = function() {
 	var url = $('#linkshort-url').val();
@@ -304,11 +326,11 @@ $('#linkshort-url').on('keydown', function(e) {
 });
 $('#linkshort-btn').on('click', linkshort);
 
-
 // Encoder
 $('#encoder-encode-btn').on('click', function() {
 	var form = document.forms['encoder-form'];
 	var data = $(form).serialize();
+    form.to.value = '';
 	$('.encoder-btn').attr('disabled', 'disabled');
 	$.post('/encode', data, function(result) {
 		$('.encoder-btn').attr('disabled', false);
@@ -319,13 +341,46 @@ $('#encoder-encode-btn').on('click', function() {
 $('#encoder-decode-btn').on('click', function() {
 	var form = document.forms['encoder-form'];
 	var data = $(form).serialize();
-	$('.encoder-btn').attr('disabled', 'disabled');
-	$.post('/decode', data, function(result) {
-		$('.encoder-btn').attr('disabled', false);
-		form.from.value = result;
-	});
+
+    if ($('[name="encoding"]:checked', form).val()=='binfile') {
+        form.action = '/decode';
+        form.submit();
+    } else {
+        $('.encoder-btn').attr('disabled', 'disabled');
+        $.post('/decode', data, function(result) {
+            $('.encoder-btn').attr('disabled', false);
+            form.from.value = result;
+        });
+    }
 	return false;
 });
+$('form[name="encoder-form"] input[name="encoding"]').click(function() {
+    if ($(this).val()=='binfile') {
+        $('#encoder-from').hide();
+        $('#encoder-from-file').show();
+    } else {
+        $('#encoder-from-file').hide();
+        $('#encoder-from').show();
+    }
+});
+$("#encoder-uploadify").uploadify({
+    height: 30,
+    swf: '/plugin/uploadify/uploadify.swf',
+    uploader: '/uploadify',
+    width: 120,
+    fileSizeLimit: '500KB',
+    multi: false,
+    removeTimeout: 1,
+    onUploadSuccess: function (file, data, response) {
+        var json = eval('('+data+')');
+        if (json.path) {
+            $('#encoder-uploadify-display').html(json.originalname+' ('+sizeformat(json.size)+')');
+            $('#encoder-from-file-path').val(json.path);
+        }
+    }
+});
+$("#encoder-from-file").hide();
+
 
 // Cipher
 $('#cipher-encode-btn').on('click', function() {

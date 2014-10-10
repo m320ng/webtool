@@ -5,6 +5,7 @@ var spawn = require('child_process').spawn;
 var crypto = require('crypto');
 var Iconv = require("iconv").Iconv;
 var geoip = require('geoip-lite');
+var fs = require('fs');
 var google = require('googleapis');
 /*
 var OAuth2 = google.auth.OAuth2;
@@ -97,23 +98,42 @@ router.get('/', function(req, res) {
 	res.render('index', locals);
 });
 
+router.post('/uploadify', function(req, res) {
+	console.log(req.files);
+	res.json(req.files['Filedata']);
+});
+
 router.post('/encode', function(req, res) {
 	var type = req.body['type'];
 	var plain = req.body['from'];
 	var encoding = req.body['encoding'];
+	var path = req.body['from-file-path'];
+	path = path.replace(/\.\./g, '');
 
 	//res.writeHead(200, {'Content-Type': 'text/plain'});
 	result = '';
 	try {
 		var buff = null;
-		if (encoding!='utf8') {
+		if (encoding=='euckr') {
 			buff = iconv_encode(plain, 'utf-8', encoding);
-		} else {
+		} else if (encoding=='utf8') {
 			buff = new Buffer(plain);
+		} else if (encoding=='binfile') {
+			if (path) {
+				console.log(__dirname+'/../'+path);
+				if (fs.existsSync(__dirname+'/../'+path)) {
+					buff = fs.readFileSync(__dirname+'/../'+path);
+				}
+			}
+			if (!buff) {
+				buff = new Buffer();
+			}
 		}
 
 		if (type=='base64') {
 			result = buff.toString('base64');
+		} else if (type=='hex') {
+			result = buff.toString('hex');
 		} else if (type=='url') {
 			var enc = [];
 			for (var i=0; i<buff.length; i++) {
@@ -123,7 +143,9 @@ router.post('/encode', function(req, res) {
 				{
 					enc.push(String.fromCharCode(buff[i]));
 				} else {
-					enc.push('%' + buff[i].toString(16).toUpperCase());
+					var hex = buff[i].toString(16).toUpperCase();
+					if (hex.length==1) hex = '0' + hex;
+					enc.push('%' + hex);
 				}
 			}
 			result = enc.join('');
@@ -140,12 +162,16 @@ router.post('/decode', function(req, res) {
 	var encoded = req.body['to'];
 	var encoding = req.body['encoding'];
 
+	console.log(req.body);
+
 	//res.writeHead(200, {'Content-Type': 'text/plain'});
 	result = '';
 	try {
 		var buff = null;
 		if (type=='base64') {
 			buff = new Buffer(encoded, 'base64');
+		} else if (type=='hex') {
+			buff = new Buffer(encoded, 'hex');
 		} else if (type=='url') {
 			var dec = [];
 			for (var i=0; i<encoded.length; i++) {
@@ -162,13 +188,25 @@ router.post('/decode', function(req, res) {
 			buff = new Buffer(dec.join(''), 'hex');
 		}
 
-		if (encoding!='utf8') {
+		if (encoding=='euckr') {
 			result = iconv_encode(buff, encoding, 'utf-8').toString();
-		} else {
+		} else if (encoding=='utf8') {
 			result = buff.toString();
+		} else if (encoding=='binfile') {
+			// download
+			res.writeHead(200, {
+				'Content-Type': 'file/unknown',
+				'Content-Disposition': 'attachment; filename="decode.bin"',
+				'Pragma': 'no-cache',
+				'Expires': '0',
+			});
+			res.write(buff, 'binary');
+			res.end();
+			return;
 		}
 	} catch (e) {
 		result = e.message;
+		console.log(e);
 	}
 	res.write(result);
 	res.end();
