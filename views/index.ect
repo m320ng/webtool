@@ -2,10 +2,9 @@
 
 <h1>Web Tools</h1>
 
-
 <div class="row">
   <div class="col-sm-6">
-    <h3>Client Info</h3>
+    <h3>Client Info <small>접속자 정보</small></h3>
     <form class="form-horizontal">
     <div class="form-group">
       <label for="webinfo-ip" class="col-sm-2 control-label">Your IP</label>
@@ -13,26 +12,34 @@
         <div class="input-group">
           <input type="text" class="form-control" id="webinfo-ip" value="<%- @webinfo.ip%>"/>
           <div class="input-group-btn">
-          <button class="btn btn-info">Copy</button>
+          <button class="btn btn-info clipboard-copy">Copy</button>
           </div>
         </div>
       </div>
     </div>
     <div class="form-group">
-      <label for="webinfo-ip" class="col-sm-2 control-label">Agent</label>
+      <label for="webinfo-agent" class="col-sm-2 control-label">Agent</label>
       <div class="col-sm-10">
         <div class="input-group">
           <input type="text" class="form-control" id="webinfo-agent" value="<%- @webinfo.agent%>"/>
           <div class="input-group-btn">
-          <button class="btn btn-info">Copy</button>
+          <button class="btn btn-info clipboard-copy">Copy</button>
           </div>
         </div>
       </div>
     </div>
+	<!--
+    <div class="form-group">
+      <label for="webinfo-raw" class="col-sm-2 control-label">Raw</label>
+      <div class="col-sm-10">
+	  <textarea class="form-control" rows="3"><%- @webinfo.headers%></textarea>
+      </div>
+    </div>
+	-->
     </form>
   </div>
   <div class="col-sm-6">
-    <h3>Ping Test</h3>
+    <h3>Ping Test <small>핑테스트</small></h3>
     <div class="form-group">
       <div class="input-group">
         <input type="text" class="form-control" id="ping-host" value="" placeholder="Input IP or Domain"/>
@@ -48,7 +55,7 @@
 </div>
 <div class="row">
   <div class="col-sm-6">
-    <h3>Encoder/Decoder</h3>
+    <h3>Encoder/Decoder <small>인코딩/디코딩</small></h3>
     <form name="encoder-form">
     <div class="form-group">
       <label class="radio-inline">
@@ -77,7 +84,7 @@
     </form>
   </div>
   <div class="col-sm-6">
-    <h3>Hash Digest</h3>
+    <h3>Hash Digest <small>해싱처리</small></h3>
 	<form name="hash-form">
     <div class="form-group">
       <div class="input-group">
@@ -100,7 +107,7 @@
   </div>
 </div>
 
-<h3>Cipher</h3>
+<h3>Cipher <small>비밀키 암복호화</small></h3>
 <form name="cipher-form">
 <div class="row">
   <div class="col-sm-6">
@@ -149,7 +156,7 @@
 
 <div class="row">
   <div class="col-sm-6">
-    <h3>Whois</h3>
+    <h3>Whois <small>도메인 정보</small></h3>
     <div class="form-group">
       <div class="input-group">
         <input type="text" class="form-control" id="whois-host" value="" placeholder="Input Domain or IP"/>
@@ -163,7 +170,7 @@
     </div>
   </div>
   <div class="col-sm-6">
-    <h3>DNS Lookup</h3>
+    <h3>DNS Lookup <small>도메인에 연결된 IP</small></h3>
     <div class="form-group">
       <div class="input-group">
         <input type="text" class="form-control" id="nslookup-host" value="" placeholder="Input Domain"/>
@@ -179,7 +186,7 @@
 </div>
 <div class="row">
   <div class="col-sm-6">
-    <h3>HTTP Headers</h3>
+    <h3>HTTP Headers <small>HTTP 헤더 정보</small></h3>
     <div class="form-group">
       <div class="input-group">
         <span class="input-group-addon">http://</span>
@@ -194,7 +201,7 @@
     </div>
   </div>
   <div class="col-sm-6">
-    <h3>IP Location <small>GeoIP</small></h3>
+    <h3>IP Location <small>IP 위치정보, GeoIP</small></h3>
     <div class="form-group">
       <div class="input-group">
         <input type="text" class="form-control" id="geoip-ip" value="" placeholder="Input IP"/>
@@ -210,7 +217,7 @@
 </div>
 <div class="row">
   <div class="col-sm-6">
-    <h3>Link Shortener</h3>
+    <h3>Link Shortener <small>URL 짧게 줄이기 (goo.gl)</small></h3>
     <div class="form-group">
       <div class="input-group">
         <span class="input-group-addon">http://</span>
@@ -224,7 +231,7 @@
       <div class="input-group">
         <input type="text" id="linkshort-result" class="form-control" id="short-link" value="" placeholder="Result"/>
         <div class="input-group-btn">
-        <button class="btn btn-info clipboard">Copy</button>
+        <button class="btn btn-info clipboard-copy">Copy</button>
         </div>
       </div>
     </div>
@@ -276,6 +283,7 @@
   </div>
 </div>
 
+<script type="text/javascript" src="/javascripts/jquery.clipboard.js"></script>
 <script type="text/javascript">
 // Link Shortener
 var linkshort = function() {
@@ -447,4 +455,15 @@ $('#geoip-ip').on('keydown', function(e) {
 });
 $('#geoip-btn').on('click', geoip);
 
+$('.clipboard-copy').click(function() {
+	alert('클립보드로 복사되었습니다.');
+	return false;
+});
+$('.clipboard-copy').clipboard({
+    path: '/javascripts/jquery.clipboard.swf',
+    copy: function() {
+        var val = $(this).closest('.input-group').find('input[type="text"]').val();
+        return val;
+    }
+});
 </script>
