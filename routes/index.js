@@ -6,6 +6,7 @@ var crypto = require('crypto');
 var Iconv = require("iconv").Iconv;
 var geoip = require('geoip-lite');
 var fs = require('fs');
+
 var google = require('googleapis');
 /*
 var OAuth2 = google.auth.OAuth2;
@@ -331,7 +332,7 @@ router.post('/ping', function(req, res) {
 	}
 
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
-	spawn_pipe_http(req, res, "ping", ['-c3', host], 30000);
+	spawn_pipe_http(req, res, "ping", ['-c3', host], 10000);
 });
 
 router.post('/nslookup', function(req, res) {
@@ -344,7 +345,7 @@ router.post('/nslookup', function(req, res) {
 		return;
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
-	spawn_pipe_http(req, res, "nslookup", [host], 30000);
+	spawn_pipe_http(req, res, "nslookup", [host], 10000);
 });
 
 router.post('/whois', function(req, res) {
@@ -357,7 +358,7 @@ router.post('/whois', function(req, res) {
 		return;
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
-	spawn_pipe_http(req, res, "whois", [host], 30000);
+	spawn_pipe_http(req, res, "whois", [host], 10000);
 });
 
 router.post('/geoip', function(req, res) {
@@ -405,8 +406,8 @@ router.post('/linkshort', function(req, res) {
 
 		urlshortener.url.insert(params, function (err, response) {
 			if (err) {
-				res.write(err);
-				res.write(response);
+				res.write(util.inspect(err));
+				res.write(util.inspect(response));
 				res.end();
 			} else {
 				res.write(response.id);

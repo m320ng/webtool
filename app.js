@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var multer = require('multer');
 
 var routes = require('./routes/index');
+var imagemap = require('./routes/imagemap');
 
 var app = express();
 var ECT = require('ect');
@@ -14,6 +15,7 @@ var ectRenderer = ECT({ watch: true, root: __dirname + '/views', ext : '.ect' })
 
 // view engine setup
 app.engine('ect', ectRenderer.render);
+app.set("views", __dirname + '/views');
 app.set("view engine", "ect");
 
 // uncomment after placing your favicon in /public
@@ -26,6 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(multer({ dest: 'files/'}))
 
 app.use('/', routes);
+app.use('/imagemap', imagemap);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
