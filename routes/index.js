@@ -6,6 +6,7 @@ var crypto = require('crypto');
 var iconv = require('iconv-lite');
 var geoip = require('geoip-lite');
 var fs = require('fs');
+var request = require('request');
 
 var google = require('googleapis');
 /*
@@ -79,9 +80,9 @@ function spawn_pipe_http(req, res, cmd, args, time) {
 	return process;
 }
 
-function iconv_encode(str, from, to) {
-	//var iconv = new Iconv(from, to + '//IGNORE');
-	return iconv.convert(str);
+function iconv_encode(buff, from, to) {
+	var str = buff.toString(from);
+	return iconv.encode(str, to + '//IGNORE');
 }
 
 router.get('/', function(req, res) {
@@ -358,7 +359,19 @@ router.post('/whois', function(req, res) {
 		return;
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
-	spawn_pipe_http(req, res, "wget", ['http://whois.nic.or.kr/kor/whois.jsc', '--post-data=query=heyo.me', '-qO-'], 30000);
+	request.post('http://whois.nic.or.kr/kor/whois.jsc', {form:{query:host}}, function(e, r, body) {
+		console.log(body);
+		var re = /<pre[^>]+>([\s\S]+)<\/pre>/g;
+		console.log(body.match(re));
+		var matches = re.exec(body);
+		console.log(matches);
+		if (matches) {
+			res.write(matches[1]);
+		} else {
+			res.write(body);
+		}
+		res.end();
+	});
 });
 
 router.post('/geoip', function(req, res) {
