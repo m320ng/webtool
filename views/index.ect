@@ -672,3 +672,528 @@ $('.clipboard-copy').clipboard({
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD60I1Ft2bn_ep9HbWuxyhlyWN9_QlgjrU&signed_in=true&callback=initMap"
         async defer></script>
+=======
+<% extend 'layout' %>
+
+<h1>Web Tools</h1>
+
+<div class="row">
+  <div class="col-sm-6">
+    <h3>Client Info <small>접속자 정보</small></h3>
+    <form class="form-horizontal">
+    <div class="form-group">
+      <label for="webinfo-ip" class="col-sm-2 control-label">Your IP</label>
+      <div class="col-sm-10">
+        <div class="input-group">
+          <input type="text" class="form-control" id="webinfo-ip" value="<%- @webinfo.ip%>"/>
+          <div class="input-group-btn">
+          <button class="btn btn-info clipboard-copy">Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="webinfo-agent" class="col-sm-2 control-label">Agent</label>
+      <div class="col-sm-10">
+        <div class="input-group">
+          <input type="text" class="form-control" id="webinfo-agent" value="<%- @webinfo.agent%>"/>
+          <div class="input-group-btn">
+          <button class="btn btn-info clipboard-copy">Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+	<!--
+    <div class="form-group">
+      <label for="webinfo-raw" class="col-sm-2 control-label">Raw</label>
+      <div class="col-sm-10">
+	  <textarea class="form-control" rows="3"><%- @webinfo.headers%></textarea>
+      </div>
+    </div>
+	-->
+    </form>
+  </div>
+  <div class="col-sm-6">
+    <h3>Ping Test <small>핑테스트</small></h3>
+    <div class="form-group">
+      <div class="input-group">
+        <input type="text" class="form-control" id="ping-host" value="" placeholder="Input IP or Domain"/>
+        <div class="input-group-btn">
+        <button id="ping-btn" class="btn btn-info">Test</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div id="ping-result" class="well well-sm"></div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-6">
+    <h3>Encoder/Decoder <small>인코딩/디코딩</small></h3>
+    <form name="encoder-form" method="post">
+    <div class="form-group">
+      <label class="radio-inline">
+      <input type="radio" name="encoding" value="utf8" checked="checked"/> UTF-8
+      </label>
+      <label class="radio-inline">
+      <input type="radio" name="encoding" value="euckr"/> EUC-KR
+      </label>
+      <label class="radio-inline">
+      <input type="radio" name="encoding" value="binfile"/> Binary File
+      </label>
+    </div>
+    <div class="form-group">
+      <textarea class="form-control" id="encoder-from" name="from" rows="3" placeholder="From"></textarea>
+      <div id="encoder-from-file">
+        <div id="encoder-uploadify-display" style="border:1px solid #c8c8c8; padding:5px;">선택해주세요</div>
+        <div id="encoder-uploadify"></div>
+      </div>
+      <input type="hidden" id="encoder-from-file-path" name="from-file-path"/>
+    </div>
+    <div class="form-group">
+      <label class="radio-inline">
+      <input type="radio" name="type" value="url" checked="checked"/> URL
+      </label>
+      <label class="radio-inline">
+      <input type="radio" name="type" value="hex"/> HEX
+      </label>
+      <label class="radio-inline">
+      <input type="radio" name="type" value="base64"/> BASE64
+      </label>
+    </div>
+    <div class="form-group">
+      <textarea class="form-control" name="to" rows="3" placeholder="To"></textarea>
+    </div>
+    <button id="encoder-encode-btn" class="btn btn-primary">Encode</button>
+    <button id="encoder-decode-btn" class="btn btn-primary">Decode</button>
+    </form>
+  </div>
+  <div class="col-sm-6">
+    <h3>Hash Digest <small>해싱처리</small></h3>
+	<form name="hash-form">
+    <div class="form-group">
+      <div class="input-group">
+        <span class="input-group-addon">Hash</span>
+        <select name="type" class="form-control">
+        <% for hash in @hashes : %>
+        <option value="<%-hash%>"><%-hash%></option>
+        <% end %>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <textarea id="hash-plain" name="plain" class="form-control" name="content" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <textarea id="hash-result" name="result" class="form-control" name="content" rows="3"></textarea>
+    </div>
+	</form>
+    <button id="hash-btn" class="btn btn-primary">Encode</button>
+  </div>
+</div>
+
+<h3>Cipher <small>비밀키 암복호화</small></h3>
+<form name="cipher-form">
+<div class="row">
+  <div class="col-sm-6">
+    <div class="input-group">
+      <span class="input-group-addon">Cipher</span>
+      <select name="type" class="form-control">
+      <% for cipher in @ciphers : %>
+      <option value="<%-cipher%>"><%-cipher%></option>
+      <% end %>
+      </select>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="input-group">
+      <span class="input-group-addon">Password</span>
+      <input type="text" name="password" class="form-control" value="" placeholder="Password"/>
+    </div>
+  </div>
+</div>
+<br/>
+<div class="row">
+  <div class="col-sm-6">
+    <div class="form-group">
+      <select name="input-encoding" class="form-control">
+      <option value="utf8">UTF8</option>
+      <option value="ascii">ASCII</option>
+      <option value="hex">HEX</option>
+      <option value="base64">BASE64</option>
+      </select>
+      <textarea class="form-control" name="from" rows="3" placeholder="From"></textarea>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="form-group">
+      <select name="output-encoding" class="form-control">
+      <option value="hex">HEX</option>
+      <option value="base64">BASE64</option>
+      </select>
+      <textarea class="form-control" name="to" rows="3" placeholder="To"></textarea>
+    </div>
+  </div>
+</div>
+</form>
+<button id="cipher-encode-btn" class="btn btn-primary encode-btn">Encode</button>
+<button id="cipher-decode-btn" class="btn btn-primary encode-btn">Decode</button>
+
+<div class="row">
+  <div class="col-sm-6">
+    <h3>Whois <small>도메인 정보</small></h3>
+    <div class="form-group">
+      <div class="input-group">
+        <input type="text" class="form-control" id="whois-host" value="" placeholder="Input Domain or IP"/>
+        <div class="input-group-btn">
+        <button id="whois-btn" class="btn btn-info">Lookup</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div id="whois-result" class="well well-sm" style="max-height:200px; overflow:auto;"></div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <h3>DNS Lookup <small>도메인에 연결된 IP</small></h3>
+    <div class="form-group">
+      <div class="input-group">
+        <input type="text" class="form-control" id="nslookup-host" value="" placeholder="Input Domain"/>
+        <div class="input-group-btn">
+        <button id="nslookup-btn" class="btn btn-info">Lookup</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div id="nslookup-result" class="well well-sm"></div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-6">
+    <h3>HTTP Headers <small>HTTP 헤더 정보</small></h3>
+    <div class="form-group">
+      <div class="input-group">
+        <span class="input-group-addon">http://</span>
+        <input type="text" class="form-control" id="headers-url" value="" placeholder="URL"/>
+        <div class="input-group-btn">
+        <button id="headers-btn" class="btn btn-info">Check</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div id="headers-result" class="well well-sm"></div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <h3>IP Location <small>IP 위치정보, GeoIP</small></h3>
+    <div class="form-group">
+      <div class="input-group">
+        <input type="text" class="form-control" id="geoip-ip" value="" placeholder="Input IP"/>
+        <div class="input-group-btn">
+        <button id="geoip-btn" class="btn btn-info">Test</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div id="geoip-result" class="well well-sm"></div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-6">
+    <h3>Link Shortener <small>URL 짧게 줄이기 (goo.gl)</small></h3>
+    <div class="form-group">
+      <div class="input-group">
+        <span class="input-group-addon">http://</span>
+        <input id="linkshort-url" type="text" class="form-control" value="" placeholder="URL"/>
+        <div class="input-group-btn">
+        <button id="linkshort-btn" class="btn btn-info">Do It!</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="input-group">
+        <input type="text" id="linkshort-result" class="form-control" id="short-link" value="" placeholder="Result"/>
+        <div class="input-group-btn">
+        <button class="btn btn-info clipboard-copy">Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <h3>Server Status <small>OS / Port</small></h3>
+    <div class="form-group">
+      <div class="input-group">
+        <input type="text" class="form-control" id="" value="" placeholder="Input IP or Domain"/>
+        <div class="input-group-btn">
+        <button class="btn btn-info">Test</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <textarea class="form-control" name="content" rows="3"></textarea>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-6">
+    <h3>QR Code Gen.</h3>
+    <div class="form-group">
+      <div class="input-group">
+        <span class="input-group-addon">http://</span>
+        <input type="text" class="form-control" id="" value="" placeholder="URL"/>
+        <div class="input-group-btn">
+        <button class="btn btn-info">Check</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+    <img src=""/>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <h3>Barcode Gen.</h3>
+    <div class="form-group">
+      <div class="input-group">
+        <input type="text" class="form-control" id="" value="" placeholder="Numbers"/>
+        <div class="input-group-btn">
+        <button class="btn btn-info">Check</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+    <img src=""/>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/jquery.clipboard.js"></script>
+<script type="text/javascript">
+var sizeformat = function(b) {
+    if (1024 * 1024 * 1024 < b)
+        return (b / (1024 * 1024 * 1024)).toFixed(2) + 'G';
+    else if (1024 * 1024 < b)
+        return (b / (1024 * 1024)).toFixed(2) + 'MB';
+    else if (1024 < b)
+        return parseInt(b / 1024) + 'KB';
+    else
+        return b;
+}
+
+// Link Shortener
+var linkshort = function() {
+	var url = $('#linkshort-url').val();
+	$('#linkshort-url').attr('disabled', 'disabled');
+	$('#linkshort-btn').attr('disabled', 'disabled');
+	$.post('/linkshort', {url:url}, function(result) {
+		$('#linkshort-url').attr('disabled', false);
+		$('#linkshort-btn').attr('disabled', false);
+		$('#linkshort-result').val(result);
+	});
+}
+$('#linkshort-url').on('keydown', function(e) {
+	if (e.keyCode==13) {
+		linkshort();
+		return false;
+	}
+});
+$('#linkshort-btn').on('click', linkshort);
+
+// Encoder
+$('#encoder-encode-btn').on('click', function() {
+	var form = document.forms['encoder-form'];
+	var data = $(form).serialize();
+    form.to.value = '';
+	$('.encoder-btn').attr('disabled', 'disabled');
+	$.post('/encode', data, function(result) {
+		$('.encoder-btn').attr('disabled', false);
+		form.to.value = result;
+	});
+	return false;
+});
+$('#encoder-decode-btn').on('click', function() {
+	var form = document.forms['encoder-form'];
+	var data = $(form).serialize();
+
+    if ($('[name="encoding"]:checked', form).val()=='binfile') {
+        form.action = '/decode';
+        form.submit();
+    } else {
+        $('.encoder-btn').attr('disabled', 'disabled');
+        $.post('/decode', data, function(result) {
+            $('.encoder-btn').attr('disabled', false);
+            form.from.value = result;
+        });
+    }
+	return false;
+});
+$('form[name="encoder-form"] input[name="encoding"]').click(function() {
+    if ($(this).val()=='binfile') {
+        $('#encoder-from').hide();
+        $('#encoder-from-file').show();
+    } else {
+        $('#encoder-from-file').hide();
+        $('#encoder-from').show();
+    }
+});
+$("#encoder-uploadify").uploadify({
+    height: 30,
+    swf: '/plugin/uploadify/uploadify.swf',
+    uploader: '/uploadify',
+    width: 120,
+    fileSizeLimit: '500KB',
+    multi: false,
+    removeTimeout: 1,
+    onUploadSuccess: function (file, data, response) {
+        var json = eval('('+data+')');
+        if (json.path) {
+            $('#encoder-uploadify-display').html(json.originalname+' ('+sizeformat(json.size)+')');
+            $('#encoder-from-file-path').val(json.path);
+        }
+    }
+});
+$("#encoder-from-file").hide();
+
+
+// Cipher
+$('#cipher-encode-btn').on('click', function() {
+	var form = document.forms['cipher-form'];
+	var data = $(form).serialize();
+	$('.cipher-btn').attr('disabled', 'disabled');
+	$.post('/cipher', data, function(result) {
+		$('.cipher-btn').attr('disabled', false);
+		form.to.value = result;
+	});
+	return false;
+});
+$('#cipher-decode-btn').on('click', function() {
+	var form = document.forms['cipher-form'];
+	var data = $(form).serialize();
+	$('.cipher-btn').attr('disabled', 'disabled');
+	$.post('/decipher', data, function(result) {
+		$('.cipher-btn').attr('disabled', false);
+		form.from.value = result;
+	});
+	return false;
+});
+
+// Hash Digest
+$('#hash-btn').on('click', function() {
+	var form = document.forms['hash-form'];
+	var data = $(form).serialize();
+	$('#hash-btn').attr('disabled', 'disabled');
+	$.post('/hash', data, function(result) {
+		$('#hash-btn').attr('disabled', false);
+		form.result.value = result;
+	});
+});
+
+// Ping Test
+var ping = function() {
+	var host = $('#ping-host').val();
+	$('#ping-host').attr('disabled', 'disabled');
+	$('#ping-btn').attr('disabled', 'disabled');
+	$.post('/ping', {host:host}, function(result) {
+		$('#ping-host').attr('disabled', false);
+		$('#ping-btn').attr('disabled', false);
+		$('#ping-result').html(result.replace(/\n/g, '<br/>'));
+	});
+}
+$('#ping-host').on('keydown', function(e) {
+	if (e.keyCode==13) {
+		ping();
+		return false;
+	}
+});
+$('#ping-btn').on('click', ping);
+
+// DNS Looup
+var nslookup = function() {
+	var host = $('#nslookup-host').val();
+	$('#nslookup-host').attr('disabled', 'disabled');
+	$('#nslookup-btn').attr('disabled', 'disabled');
+	$.post('/nslookup', {host:host}, function(result) {
+		$('#nslookup-host').attr('disabled', false);
+		$('#nslookup-btn').attr('disabled', false);
+		$('#nslookup-result').html(result.replace(/\n/g, '<br/>'));
+	});
+}
+$('#nslookup-host').on('keydown', function(e) {
+	if (e.keyCode==13) {
+		nslookup();
+		return false;
+	}
+});
+$('#nslookup-btn').on('click', nslookup);
+
+// DNS Whois
+var whois = function() {
+	var host = $('#whois-host').val();
+	$('#whois-host').attr('disabled', 'disabled');
+	$('#whois-btn').attr('disabled', 'disabled');
+	$.post('/whois', {host:host}, function(result) {
+		$('#whois-host').attr('disabled', false);
+		$('#whois-btn').attr('disabled', false);
+		$('#whois-result').html(result.replace(/\n/g, '<br/>'));
+	});
+}
+$('#whois-host').on('keydown', function(e) {
+	if (e.keyCode==13) {
+		whois();
+		return false;
+	}
+});
+$('#whois-btn').on('click', whois);
+
+// HTTP Headers
+var headers = function() {
+	var url = $('#headers-url').val();
+	$('#headers-url').attr('disabled', 'disabled');
+	$('#headers-btn').attr('disabled', 'disabled');
+	$.post('/headers', {url:url}, function(result) {
+		$('#headers-url').attr('disabled', false);
+		$('#headers-btn').attr('disabled', false);
+		$('#headers-result').html(result.replace(/\n/g, '<br/>'));
+	});
+}
+$('#headers-url').on('keydown', function(e) {
+	if (e.keyCode==13) {
+		headers();
+		return false;
+	}
+});
+$('#headers-btn').on('click', headers);
+
+// GeoIP
+var geoip = function() {
+	var ip = $('#geoip-ip').val();
+	$('#geoip-ip').attr('disabled', 'disabled');
+	$('#geoip-btn').attr('disabled', 'disabled');
+	$.post('/geoip', {ip:ip}, function(result) {
+		$('#geoip-ip').attr('disabled', false);
+		$('#geoip-btn').attr('disabled', false);
+		$('#geoip-result').html(result.replace(/\n/g, '<br/>'));
+	});
+}
+$('#geoip-ip').on('keydown', function(e) {
+	if (e.keyCode==13) {
+		geoip();
+		return false;
+	}
+});
+$('#geoip-btn').on('click', geoip);
+
+$('.clipboard-copy').click(function() {
+	alert('클립보드로 복사되었습니다.');
+	return false;
+});
+$('.clipboard-copy').clipboard({
+    path: '/javascripts/jquery.clipboard.swf',
+    copy: function() {
+        var val = $(this).closest('.input-group').find('input[type="text"]').val();
+        return val;
+    }
+});
+</script>
