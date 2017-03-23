@@ -346,6 +346,19 @@ router.post('/nslookup', function(req, res) {
 		return;
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
+	spawn_pipe_http(req, res, "nslookup", [host], 30000);
+});
+
+router.post('/dig', function(req, res) {
+	var host = req.body['host'];
+
+	//res.writeHead(200, {'Content-Type': 'text/plain'});
+	if (!host) {
+		res.write('error: input host');
+		res.end();
+		return;
+	}
+	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
 	spawn_pipe_http(req, res, "dig", [host], 30000);
 });
 
@@ -360,16 +373,14 @@ router.post('/whois', function(req, res) {
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
 	request.post('http://whois.nic.or.kr/kor/whois.jsc', {form:{query:host}}, function(e, r, body) {
-		console.log(body);
 		var re = /<pre[^>]+>([\s\S]+)<\/pre>/g;
-		console.log(body.match(re));
 		var matches = re.exec(body);
-		console.log(matches);
 		if (matches) {
-			res.write(matches[1]);
-		} else {
-			res.write(body);
+			body = matches[1];
 		}
+		body = body.replace(/<script[^>]+>([\s\S]+)<\/script>/gi, '');
+		body = body.replace(/<[/]?[^>]+>/g, '');
+		res.write(body);
 		res.end();
 	});
 });

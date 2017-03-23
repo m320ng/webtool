@@ -221,7 +221,7 @@
 
 <div class="row">
   <div class="col-sm-6">
-    <h3>Whois <small>도메인 정보</small></h3>
+    <h3>Whois <small>도메인 정보 / HOST명은 제외하고 입력</small></h3>
     <div class="form-group">
       <div class="input-group">
         <input type="text" class="form-control" id="whois-host" value="" placeholder="Input Domain or IP"/>
@@ -231,7 +231,7 @@
       </div>
     </div>
     <div class="form-group">
-      <div id="whois-result" class="well well-sm" style="max-height:200px; overflow:auto;"></div>
+      <div id="whois-result" class="well well-sm" style="max-height:300px; overflow:auto;"></div>
     </div>
   </div>
   <div class="col-sm-6">
@@ -266,18 +266,17 @@
     </div>
   </div>
   <div class="col-sm-6">
-    <h3>IP Location <small>IP 위치정보, GeoIP</small></h3>
+    <h3>DIG <small>DNS 레코드</small></h3>
     <div class="form-group">
       <div class="input-group">
-        <input type="text" class="form-control" id="geoip-ip" value="" placeholder="Input IP"/>
+        <input type="text" class="form-control" id="dig-host" value="" placeholder="Input Domain"/>
         <div class="input-group-btn">
-        <button type="button" id="geoip-btn" class="btn btn-info">Test</button>
+        <button type="button" id="dig-btn" class="btn btn-info">Test</button>
         </div>
       </div>
     </div>
     <div class="form-group">
-	  <div id="geoip-map" class="well" style="height:300px; display:none;"></div>
-      <div id="geoip-result" class="well well-sm"></div>
+      <div id="dig-result" class="well well-sm"></div>
     </div>
   </div>
 </div>
@@ -303,17 +302,18 @@
     </div>
   </div>
   <div class="col-sm-6">
-    <h3><strike>Server Status</strike> <small>OS / Port</small></h3>
+    <h3>IP GeoLocation <small>IP 위치정보, GeoIP</small></h3>
     <div class="form-group">
       <div class="input-group">
-        <input type="text" class="form-control" id="" value="" placeholder="Input IP or Domain"/>
+        <input type="text" class="form-control" id="geoip-ip" value="" placeholder="Input IP"/>
         <div class="input-group-btn">
-        <button type="button" class="btn btn-info">Test</button>
+        <button type="button" id="geoip-btn" class="btn btn-info">Test</button>
         </div>
       </div>
     </div>
     <div class="form-group">
-      <textarea class="form-control" name="content" rows="3"></textarea>
+	  <div id="geoip-map" class="well" style="height:300px; display:none;"></div>
+      <div id="geoip-result" class="well well-sm"></div>
     </div>
   </div>
 </div>
@@ -507,7 +507,7 @@ $('#hash-btn').on('click', function() {
 
 // Proxy
 
-// Post
+// Simple Post
 $('#post-btn').on('click', function() {
 	var form = document.forms['post-form'];
 	$(form).empty();
@@ -541,6 +541,19 @@ $('#post-btn').on('click', function() {
 	return false;
 });
 
+$('#proxy-btn').on('click', function() {
+	var url = $('#proxy-url').val();
+	if (!url) {
+		alert('URL을 입력해주세요.');
+		('#proxy-url').focus();
+		return false;
+	}
+	var form = document.forms['proxy-form'];
+	form.action = '/proxy.php';
+	form.target = '_BLANK'
+	form.submit();
+});
+
 // Ping Test
 var ping = function() {
 	var host = $('#ping-host').val();
@@ -560,7 +573,7 @@ $('#ping-host').on('keydown', function(e) {
 });
 $('#ping-btn').on('click', ping);
 
-// DNS Looup
+// DNS Lookup
 var nslookup = function() {
 	var host = $('#nslookup-host').val();
 	$('#nslookup-host').attr('disabled', 'disabled');
@@ -578,6 +591,25 @@ $('#nslookup-host').on('keydown', function(e) {
 	}
 });
 $('#nslookup-btn').on('click', nslookup);
+
+// DIG
+var dig = function() {
+	var host = $('#dig-host').val();
+	$('#dig-host').attr('disabled', 'disabled');
+	$('#dig-btn').attr('disabled', 'disabled');
+	$.post('/dig', {host:host}, function(result) {
+		$('#dig-host').attr('disabled', false);
+		$('#dig-btn').attr('disabled', false);
+		$('#dig-result').html(result.replace(/\n/g, '<br/>'));
+	});
+}
+$('#dig-host').on('keydown', function(e) {
+	if (e.keyCode==13) {
+		dig();
+		return false;
+	}
+});
+$('#dig-btn').on('click', dig);
 
 // DNS Whois
 var whois = function() {
