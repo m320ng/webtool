@@ -1,0 +1,319 @@
+<% extend 'layout' %>
+
+<div class="page-header">
+	<h1><a href="/">Web Tools</a></h1>
+	<ul class="nav nav-pills">
+	  <li role="presentation"><a href="/">Home</a></li>
+	  <li role="presentation" class="active"><a href="/imagemap">ImageMap</a></li>
+	</ul>
+</div>
+
+<style type="text/css">
+#list-ui-container tr.selected button {}
+#list-ui-container tr.selected .position {background:#ffff00;}
+#imagemap-container {cursor:crosshair;}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+</style>
+<script type="text/javascript" src="/javascripts/jquery.clipboard.js"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+    $('#picker').css({ background: '#444', opacity: 0.5, border: '2px dashed #00f' });
+
+    var parseTag = function () {
+                var poslist = $('#poslist').val().split('\n');
+
+        $.each(poslist, function (index, value) {
+                        if (!value) {
+                                return;
+                        }
+            var $clone = addMarkupList();
+            $('.position', $clone).val(value);
+        });
+    }
+
+    var isPicker = false;
+    var offset = $('#imagemap-container').offset();
+    var downX = 0;
+    var downY = 0;
+    var isDown = false;
+    var rect = { left: 0, top: 0, width: 0, height: 0 };
+    $('body').on('click', function (e) {
+        isPicker = false;
+        if ($currentPicked) {
+            $currentPicked.removeClass('selected');
+            $currentPicked = null;
+        }
+    });
+    $('#imagemap-container').on('click', function (e) {
+        return false;
+    });
+    $('#imagemap-container').on('mousemove', function (e) {
+        var x = parseInt(e.pageX - offset.left);
+        var y = parseInt(e.pageY - offset.top);
+        var pos = x + ',' + y;
+        $('#position-dp').html(pos);
+
+        if (!isPicker) return;
+
+        if (isDown) {
+            var startX = downX;
+            var startY = downY;
+            var endX = x;
+            var endY = y;
+            var $picker = $('#picker');
+            $picker.css({ left: startX, top: startY, width: endX - startX, height: endY - startY });
+        }
+        return false;
+    });
+    $('#imagemap-container').on('mousedown', function (e) {
+        if (!isPicker) return;
+        downX = parseInt(e.pageX - offset.left);
+        downY = parseInt(e.pageY - offset.top);
+        isDown = true;
+        return false;
+    });
+    $('#imagemap-container').on('mouseup', function (e) {
+        if (!isPicker) return;
+        var x = parseInt(e.pageX - offset.left);
+        var y = parseInt(e.pageY - offset.top);
+
+        if (isDown) {
+            var startX = downX;
+            var startY = downY;
+            var endX = x;
+            var endY = y;
+
+            var $picker = $('#picker');
+            rect = { left: startX, top: startY, width: endX - startX, height: endY - startY };
+            $picker.css(rect);
+            isDown = false;
+
+            if ($currentPicked) {
+                $('.position', $currentPicked).val(parseInt(startX) + ',' + parseInt(startY) + ',' + parseInt(endX) + ',' + parseInt(endY));
+				$('#poslist').val(getTag());
+            }
+        }
+        return false;
+    });
+
+    var $currentPicked = null;
+    $('#list-ui-container').on('click', '.pick-btn', function () {
+        isPicker = true;
+        var $tr = $(this).closest('tr');
+
+        if ($currentPicked) {
+            $currentPicked.removeClass('selected');
+            if ($currentPicked[0] == $tr[0]) {
+                $currentPicked = null;
+                return;
+            }
+        }
+        $currentPicked = $tr;
+        $currentPicked.addClass('selected');
+
+        var position = $('.position', $currentPicked).val().split(',');
+        if (position && position.length >= 4) {
+            var $picker = $('#picker');
+            var left = parseInt(position[0]);
+            var top = parseInt(position[1]);
+            var right = parseInt(position[2]);
+            var bottom = parseInt(position[3]);
+            rect = { left: left, top: top, width: right - left, height: bottom - top };
+            $picker.css(rect);
+        }
+
+        return false;
+    });
+    $('#list-ui-container').on('click', '.add-btn', function () {
+        var $tr = $(this).closest('tr');
+        addMarkupList($tr);
+        return false;
+    });
+    $('#list-ui-container').on('click', '.del-btn', function () {
+        var $tr = $(this).closest('tr');
+        var count = $('tr', $tr.parent()).length;
+        if (count == 1) {
+            $(':input', $tr).val('');
+            return;
+        }
+        $tr.remove();
+        //renamingItem();
+        return false;
+    });
+    var addMarkupList = function ($tr, first) {
+        var $clone = $templateItem.clone();
+        $(':input', $clone).val('');
+
+        if (!$tr) {
+            $('#list-ui-container tbody').append($clone);
+        } else {
+            $tr.after($clone);
+        }
+        $('div.item-image', $clone).each(function (index) {
+            if (ItemCount < index + 1) {
+                $(this).hide();
+                return; ;
+            }
+        });
+
+        if (first) {
+            $tr.remove();
+        }
+
+                $('.pick-btn', $clone).click();
+        //renamingItem();
+        return $clone;
+    }
+
+    var getTag = function () {
+        var tag = '';
+        $('#list-ui-container tbody tr').each(function () {
+            var href = $('.href', this).val();
+            var coords = $('.position', this).val();
+            var alt = $('.alt', this).val();
+            tag += ['<area ', 'href="', href, '" ', 'coords="', coords, '" ', 'alt="', alt, '"', '>\n'].join('');
+        });
+        return tag;
+    }
+
+    var $templateItem = $('#list-ui-container tbody').find('tr:last').remove();
+
+    parseTag();
+
+    if (!$('#list-ui-container tbody tr').length) {
+        addMarkupList();
+    }
+
+	if (!$('.pick-btn:first').closest('tr').is('.selected')) {
+		$('.pick-btn:first').click();
+	}
+
+	$(document).on('change', ':file', function() {
+		var input = $(this),
+			numFiles = input.get(0).files ? input.get(0).files.length : 1,
+			label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+
+		input.trigger('fileselect', [numFiles, label, input.val()]);
+	});
+
+    $('input').on('fileselect', function(event, numFiles, label, file) {
+        console.log(numFiles);
+        console.log(label);
+		$('#file-display').val(label);
+		dynamic_iframe('/imagemap/upload', document.forms['upload-form']);
+    });
+});
+
+function dynamic_iframe_load(el) {
+	if (/[0-9]{3} .*/.test(el.contentDocument.title)) {
+		alert('파일을 업로드하지 못하였습니다.\n(' + el.contentDocument.title + ')');
+		return;
+	}
+}
+function dynamic_iframe(href, form) {
+	var name = '_dynamic_iframe';
+	var html = '<iframe	id="'+name+'" onload="dynamic_iframe_load(this)" name="'+name+'" frameborder="0" style="position:absolute; left:0; top:0; width:0; height:0;"></iframe>';
+	
+	if (!$('#_dynamic_iframe').length) {
+		$(document.body).prepend(html);
+	}
+
+	form.target = name;
+	form.action = href;
+	form.submit();
+
+	var iframeDoc = $('#_dynamic_iframe').get(0).contentDocument || $('#_dynamic_iframe').get(0).contentWindow.document;
+
+	$('.pick-btn:first').click();
+}
+function callback_upload(path) {
+	$('#imagemap').attr('src', '/'+path);
+	$('#imagemap').show();
+}
+</script>
+
+<h4>이미지 선택</h4>
+<form name="upload-form" method="post" enctype="multipart/form-data">
+<div class="input-group">
+<label class="input-group-btn">
+<span class="btn btn-default btn-file">
+    Browse <input type="file" name="file"/>
+</span>
+</label>
+<input type="text" id="file-display" class="form-control" readonly="readonly"/>
+</div>
+</form>
+
+<h4>좌표 선택</h4>
+<div id="position-dp" style="position:fixed; right:30px; top:10px; border:1px solid #c8c8c8; min-width:70px; height:20px; background:#fff; text-align:center; z-index:100;">0,0</div>
+<div id="imagemap-container" style="position:relative; background:#f4f4f4;">
+    <img id="imagemap" src="" style="display:none;"/>
+    <div id="picker" style="position:absolute; top:0; left:0;"></div>
+</div>
+
+<div id="list-ui-container">
+<table class="table table-bordered" style="width:500px;">
+    <thead>
+    <tr>
+        <th>선택</th>
+        <th>좌표</th>
+        <th class="manage">Manage</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td class="manage">
+        <button class="btn btn-sm btn-info pick-btn">Pick</button>
+        </td>
+        <td class="text">
+        <input type="text" class="form-control position"/>
+        </td>
+        <td class="data">
+            <div class="control">
+            <button class="btn btn-sm btn-success add-btn">ADD</button>
+            <button class="btn btn-sm btn-danger del-btn">DEL</button>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</div>
+
+<h4>태그</h4>
+<textarea id="poslist" rows="10" class="form-control"></textarea>
+<button class="btn btn-info clipboard">Copy</button>
+
+<script>
+$('.clipboard.btn').click(function() {
+	alert('클립보드로 복사되었습니다.');
+	alert(getTag());
+	return false;
+});
+$('.clipboard.btn').clipboard({
+	path: '/javascripts/jquery.clipboard.swf',
+	copy: function() {
+		return $('#poslist').val();
+	}
+});
+
+</script>
