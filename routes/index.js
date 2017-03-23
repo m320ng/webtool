@@ -3,7 +3,7 @@ var http = require('http');
 var util = require('util');
 var spawn = require('child_process').spawn;
 var crypto = require('crypto');
-var Iconv = require("iconv").Iconv;
+var iconv = require('iconv-lite');
 var geoip = require('geoip-lite');
 var fs = require('fs');
 
@@ -80,7 +80,7 @@ function spawn_pipe_http(req, res, cmd, args, time) {
 }
 
 function iconv_encode(str, from, to) {
-	var iconv = new Iconv(from, to + '//IGNORE');
+	//var iconv = new Iconv(from, to + '//IGNORE');
 	return iconv.convert(str);
 }
 
@@ -345,7 +345,7 @@ router.post('/nslookup', function(req, res) {
 		return;
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
-	spawn_pipe_http(req, res, "nslookup", [host], 10000);
+	spawn_pipe_http(req, res, "dig", [host], 30000);
 });
 
 router.post('/whois', function(req, res) {
@@ -358,7 +358,7 @@ router.post('/whois', function(req, res) {
 		return;
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
-	spawn_pipe_http(req, res, "whois", [host], 10000);
+	spawn_pipe_http(req, res, "wget", ['http://whois.nic.or.kr/kor/whois.jsc', '--post-data=query=heyo.me', '-qO-'], 30000);
 });
 
 router.post('/geoip', function(req, res) {
