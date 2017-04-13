@@ -1,15 +1,42 @@
 <% extend 'layout' %>
+<style>
+h3.highlight {color:blue;}
+</style>
 
 <div class="page-header">
-	<h1><a href="/">Web Tools</a></h1>
-	<ul class="nav nav-pills">
-	  <li role="presentation" class="active"><a href="/">Home</a></li>
-	  <li role="presentation"><a href="/imagemap">ImageMap</a></li>
-	</ul>
+  <h1><a href="/">Web Tools</a></h1>
+  <ul class="nav nav-pills">
+    <li role="presentation" class="active"><a href="/">Home</a></li>
+    <li role="presentation"><a href="/imagemap">ImageMap Helper</a></li>
+  </ul>
+</div>
+
+<div id="shortcut">
+<div class="btn-group" role="group">
+  <a type="button" class="btn btn-sm btn-success" href="#webinfo">Client Info</a>
+  <a type="button" class="btn btn-sm btn-success" href="#ping">Ping Test</a>
+  <a type="button" class="btn btn-sm btn-success" href="#encoder">Encoder/Decoder</a>
+  <a type="button" class="btn btn-sm btn-success" href="#hash">Hash Digest</a>
+  <a type="button" class="btn btn-sm btn-success" href="#proxy">WebProxy</a>
+  <a type="button" class="btn btn-sm btn-success" href="#post">Post Push</a>
+  <a type="button" class="btn btn-sm btn-success" href="#cipher">Cipher</a>
+  <a type="button" class="btn btn-sm btn-success" href="#whois">Whois</a>
+  <a type="button" class="btn btn-sm btn-success" href="#nslookup">DNS Lookup</a>
+</div>
+<div class="btn-group" role="group">
+  <a type="button" class="btn btn-sm btn-success" href="#headers">HTTP Headers</a>
+  <a type="button" class="btn btn-sm btn-success" href="#dig">DIG</a>
+  <a type="button" class="btn btn-sm btn-success" href="#linkshort">Link Shortener</a>
+  <a type="button" class="btn btn-sm btn-success" href="#geoip">IP GeoLocation</a>
+  <a type="button" class="btn btn-sm btn-success" href="#qrcode">QR Code Gen</a>
+  <a type="button" class="btn btn-sm btn-success" href="#barcode">Barcode Gen</a>
+  <a type="button" class="btn btn-sm btn-success" href="#get-clean">GET Value Clean</a>
+  <a type="button" class="btn btn-sm btn-success" href="#jsbeautify">JS Beautifier</a>
+</div>
 </div>
 
 <div class="row">
-  <div class="col-sm-6">
+  <div class="col-sm-6" id="webinfo">
     <h3>Client Info <small>접속자 정보</small></h3>
     <form class="form-horizontal">
     <div class="form-group">
@@ -34,17 +61,17 @@
         </div>
       </div>
     </div>
-	<!--
+    <!--
     <div class="form-group">
       <label for="webinfo-raw" class="col-sm-2 control-label">Raw</label>
       <div class="col-sm-10">
 	  <textarea class="form-control" rows="3"><%- @webinfo.headers%></textarea>
       </div>
     </div>
-	-->
+    -->
     </form>
   </div>
-  <div class="col-sm-6">
+  <div class="col-sm-6" id="ping">
     <h3>Ping Test <small>핑테스트</small></h3>
     <div class="form-group">
       <div class="input-group">
@@ -59,7 +86,7 @@
     </div>
   </div>
 </div>
-<div class="row">
+<div class="row" id="encoder">
   <div class="col-sm-6">
     <h3>Encoder/Decoder <small>인코딩/디코딩</small></h3>
     <form name="encoder-form" method="post">
@@ -75,7 +102,7 @@
       </label>
     </div>
     <div class="form-group">
-      <textarea class="form-control" id="encoder-from" name="from" rows="3" placeholder="From"></textarea>
+      <textarea class="form-control" id="encoder-from" name="from" rows="3" placeholder="From (Encode)"></textarea>
       <div id="encoder-from-file">
         <div id="encoder-uploadify-display" style="border:1px solid #c8c8c8; padding:5px;">선택해주세요</div>
         <div id="encoder-uploadify"></div>
@@ -94,15 +121,15 @@
       </label>
     </div>
     <div class="form-group">
-      <textarea class="form-control" name="to" rows="3" placeholder="To"></textarea>
+      <textarea class="form-control" name="to" rows="3" placeholder="To (Decode)"></textarea>
     </div>
     <button type="button" id="encoder-encode-btn" class="btn btn-primary">Encode</button>
     <button type="button" id="encoder-decode-btn" class="btn btn-primary">Decode</button>
     </form>
   </div>
-  <div class="col-sm-6">
+  <div class="col-sm-6" id="hash">
     <h3>Hash Digest <small>해싱처리</small></h3>
-	<form name="hash-form">
+    <form name="hash-form">
     <div class="form-group">
       <div class="input-group">
         <span class="input-group-addon">Hash</span>
@@ -119,14 +146,14 @@
     <div class="form-group">
       <textarea id="hash-result" name="result" class="form-control" name="content" rows="3"></textarea>
     </div>
-	</form>
+    </form>
     <button type="button" id="hash-btn" class="btn btn-primary">Encode</button>
   </div>
 </div>
 
 <div class="row">
-  <div class="col-sm-6">
-    <h3>Proxy <small>프록시</small></h3>
+  <div class="col-sm-6" id="proxy">
+    <h3>WebProxy <small>프록시 <code>refer, cookie, post 테스트</code></small></h3>
     <form name="proxy-form" method="post">
     <div class="form-group">
       <div class="input-group">
@@ -155,10 +182,10 @@
     </form>
     <button type="button" id="proxy-btn" class="btn btn-primary">SUBMIT</button>
   </div>
-  <div class="col-sm-6">
-    <h3>Simple Post Push <small>단순 POST값 입력</small></h3>
-	<form name="post-form">
-	</form>
+  <div class="col-sm-6" id="post">
+    <h3>Post Push <small>단순 POST값 입력</small></h3>
+    <form name="post-form">
+    </form>
     <div class="form-group">
       <div class="input-group">
         <span class="input-group-addon">http://</span>
@@ -172,6 +199,7 @@
   </div>
 </div>
 
+<div id="cipher">
 <h3>Cipher <small>비밀키 암복호화</small></h3>
 <form name="cipher-form">
 <div class="row">
@@ -218,10 +246,11 @@
 </form>
 <button type="button" id="cipher-encode-btn" class="btn btn-primary encode-btn">Encode</button>
 <button type="button" id="cipher-decode-btn" class="btn btn-primary encode-btn">Decode</button>
+</div>
 
 <div class="row">
-  <div class="col-sm-6">
-    <h3>Whois <small>도메인 정보 / HOST명은 제외하고 입력</small></h3>
+  <div class="col-sm-6" id="whois">
+    <h3>Whois <small>도메인 정보 <code>HOST명은 제외하고 입력</code></small></h3>
     <div class="form-group">
       <div class="input-group">
         <input type="text" class="form-control" id="whois-host" value="" placeholder="Input Domain or IP"/>
@@ -234,7 +263,7 @@
       <div id="whois-result" class="well well-sm" style="max-height:300px; overflow:auto;"></div>
     </div>
   </div>
-  <div class="col-sm-6">
+  <div class="col-sm-6" id="nslookup">
     <h3>DNS Lookup <small>도메인에 연결된 IP</small></h3>
     <div class="form-group">
       <div class="input-group">
@@ -250,7 +279,7 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-sm-6">
+  <div class="col-sm-6" id="headers">
     <h3>HTTP Headers <small>HTTP 헤더 정보</small></h3>
     <div class="form-group">
       <div class="input-group">
@@ -265,13 +294,13 @@
       <div id="headers-result" class="well well-sm"></div>
     </div>
   </div>
-  <div class="col-sm-6">
+  <div class="col-sm-6" id="dig">
     <h3>DIG <small>DNS 레코드</small></h3>
     <div class="form-group">
       <div class="input-group">
         <input type="text" class="form-control" id="dig-host" value="" placeholder="Input Domain"/>
         <div class="input-group-btn">
-        <button type="button" id="dig-btn" class="btn btn-info">Test</button>
+        <button type="button" id="dig-btn" class="btn btn-info">DIG</button>
         </div>
       </div>
     </div>
@@ -281,8 +310,8 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-sm-6">
-    <h3>Link Shortener <small>URL 짧게 줄이기 (goo.gl)</small></h3>
+  <div class="col-sm-6" id="linkshort">
+    <h3>Link Shortener <small>URL 짧게 줄이기 <code>goo.gl</code></small></h3>
     <div class="form-group">
       <div class="input-group">
         <span class="input-group-addon">http://</span>
@@ -301,25 +330,25 @@
       </div>
     </div>
   </div>
-  <div class="col-sm-6">
+  <div class="col-sm-6" id="geoip">
     <h3>IP GeoLocation <small>IP 위치정보, GeoIP</small></h3>
     <div class="form-group">
       <div class="input-group">
         <input type="text" class="form-control" id="geoip-ip" value="" placeholder="Input IP"/>
         <div class="input-group-btn">
-        <button type="button" id="geoip-btn" class="btn btn-info">Test</button>
+        <button type="button" id="geoip-btn" class="btn btn-info">Where</button>
         </div>
       </div>
     </div>
     <div class="form-group">
-	  <div id="geoip-map" class="well" style="height:300px; display:none;"></div>
+      <div id="geoip-map" class="well" style="height:300px; display:none;"></div>
       <div id="geoip-result" class="well well-sm"></div>
     </div>
   </div>
 </div>
 <div class="row">
-  <div class="col-sm-6">
-    <h3>QR Code Gen. <small>스마트폰 문자</small></h3>
+  <div class="col-sm-6" id="qrcode">
+    <h3>QR Code Gen. <small>QR코드 <code>스마트폰 문자열 복사때</code></small></h3>
     <div class="form-group">
       <div class="input-group">
         <input type="text" class="form-control" id="qrcode-url" value="" placeholder="Text"/>
@@ -332,7 +361,7 @@
     <img id="qrcode-result" src=""/>
     </div>
   </div>
-  <div class="col-sm-6">
+  <div class="col-sm-6" id="barcode">
     <h3>Barcode Gen. <small>바코드</small></h3>
     <div class="form-group">
       <div class="input-group">
@@ -356,7 +385,43 @@
     </div>
   </div>
 </div>
+<div class="row">
+  <div class="col-sm-6" id="get-clean">
+    <h3>GET Value Clean<small> GET값 정리 <code> URLEncoding으로 혼란할때</code></small></h3>
+    <div class="form-group">
+      <textarea class="form-control" id="get-clean-value" rows="3" placeholder="key1=value1&key2=value2"></textarea>
+      <button type="button" id="get-clean-btn" class="btn btn-primary">Clean</button>
+    </div>
+    <div class="form-group" style="margin-top:20px;">
+    <div id="get-clean-result"></div>
+    </div>
+  </div>
+  <div class="col-sm-6" id="jsbeautify">
+    <h3>JS Beautifier<small> 압축된 JS파일 정리 <code> min, pack</code></small></h3>
+    <form name="jsbeautify-form">
+    <div class="form-group">
+      <textarea class="form-control" name="data" rows="3" placeholder="min.js pack.js"></textarea>
+      <button type="button" id="jsbeautify-btn" class="btn btn-primary">Beauty</button>
+    </div>
+    <div class="form-group" id="jsbeautify-result" style="margin-top:20px; display:none;">
+      <textarea class="form-control" name="result" rows="5" placeholder=""></textarea>
+      <button type="button" id="jsbeautify-copy-btn" class="btn btn-primary">Copy</button>
+    </div>
+    </form>
+  </div>
+</div>
 
+<script type="text/javascript" src="/javascripts/jquery.smooth-scroll.min.js"></script>
+<script type="text/javascript">
+$('#shortcut a').smoothScroll({
+	beforeScroll: function() {
+		$('.row h3').removeClass('highlight');
+	},
+	afterScroll: function(options) {
+		$(options.scrollTarget + ' h3').addClass('highlight');
+	}
+});
+</script>
 <script type="text/javascript" src="/javascripts/clipboard.min.js"></script>
 <script type="text/javascript">
 var sizeformat = function(b) {
@@ -505,8 +570,6 @@ $('#hash-btn').on('click', function() {
 	});
 });
 
-// Proxy
-
 // Simple Post
 $('#post-btn').on('click', function() {
 	var form = document.forms['post-form'];
@@ -541,6 +604,7 @@ $('#post-btn').on('click', function() {
 	return false;
 });
 
+// Proxy
 $('#proxy-btn').on('click', function() {
 	var url = $('#proxy-url').val();
 	if (!url) {
@@ -690,17 +754,59 @@ $('#geoip-ip').on('keydown', function(e) {
 });
 $('#geoip-btn').on('click', geoip);
 
+// JS Beautifier
+$('#jsbeautify-btn').on('click', function() {
+	var form = document.forms['jsbeautify-form'];
+	var data = $(form).serialize();
+	$('#jsbeautify-btn').attr('disabled', 'disabled');
+	$.post('/jsbeautify', data, function(result) {
+		$('#jsbeautify-btn').attr('disabled', false);
+		form.result.value = result;
+		$('#jsbeautify-result').show();
+	});
+});
+var jsbeautify = new Clipboard('#jsbeautify-copy-btn', {
+    target: function(trigger) {
+        return $(trigger).prev()[0];
+    }
+});
+
+// Get Clean
+$('#get-clean-btn').on('click', function() {
+	var query = $('#get-clean-value').val();
+
+	var $table = $('<table class="table table-bordered"></table>');
+	var lines = query.split('&');
+	$.each(lines, function(index, line) {
+		var eqidx = line.indexOf('=');
+		var key = '';
+		var val = '';
+		if (eqidx!=-1) {
+			key = line.substring(0, eqidx);
+			val = line.substring(eqidx+1);
+		} else {
+			val = line;
+		}
+		//html encode
+		val = decodeURIComponent(val)
+			.replace('<', '&lt;');
+
+		var $tr = $('<tr></tr>');
+		$tr.append($('<th>'+key+'</th>'));
+		$tr.append($('<td>'+val+'</td>'));
+		$table.append($tr);
+	});
+
+	$('#get-clean-result').empty().append($table);
+});
+
+
+// common
 var clipboard = new Clipboard('.clipboard-copy', {
     target: function(trigger) {
         return $(trigger).closest('.input-group').find('input[type="text"]')[0];
     }
 });
-/*
-$('.clipboard-copy').click(function() {
-	alert('클립보드로 복사되었습니다.');
-	return false;
-});
-*/
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD60I1Ft2bn_ep9HbWuxyhlyWN9_QlgjrU&signed_in=true&callback=initMap"
         async defer></script>

@@ -7,6 +7,7 @@ var iconv = require('iconv-lite');
 var geoip = require('geoip-lite');
 var fs = require('fs');
 var request = require('request');
+var beautify = require('js-beautify').js_beautify;
 
 var google = require('googleapis');
 /*
@@ -63,12 +64,16 @@ function spawn_pipe_http(req, res, cmd, args, time) {
 		console.log(err);
 	});
 	process.on('exit', function(code, signal)  {
-		console.log('spawn_pipe_http: signal(' + signal + ')');
-		if (signal=='SIGUSR2') {
-			res.write('timeout');
+		try {
+			console.log('spawn_pipe_http: signal(' + signal + ')');
+			if (signal=='SIGUSR2') {
+				res.write('timeout');
+			}
+			if (timer) clearTimeout(timer);
+			res.end();
+		} catch(e) {
+			console.log(e);
 		}
-		if (timer) clearTimeout(timer);
-		res.end();
 	});
 	req.connection.on('end', function() {
 		console.log('req connection end');
@@ -372,7 +377,7 @@ router.post('/whois', function(req, res) {
 		return;
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
-	request.post('http://whois.nic.or.kr/kor/whois.jsc', {form:{query:host}}, function(e, r, body) {
+	request.post('https://whois.kisa.or.kr/kor/whois.jsc', {form:{query:host}}, function(e, r, body) {
 		var re = /<pre[^>]+>([\s\S]+)<\/pre>/g;
 		var matches = re.exec(body);
 		if (matches) {
@@ -444,5 +449,12 @@ router.post('/linkshort', function(req, res) {
 	}
 });
 
+router.post('/jsbeautify', function(req, res) {
+	var data = req.body['data'];
+
+	var output = beautify(data, { indent_size: 4 });
+	res.write(output);
+	res.end();
+});
 
 module.exports = router;
