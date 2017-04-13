@@ -6,6 +6,8 @@ var crypto = require('crypto');
 var iconv = require('iconv-lite');
 var geoip = require('geoip-lite');
 var fs = require('fs');
+var request = require('request');
+var beautify = require('js-beautify').js_beautify;
 
 var google = require('googleapis');
 /*
@@ -62,12 +64,16 @@ function spawn_pipe_http(req, res, cmd, args, time) {
 		console.log(err);
 	});
 	process.on('exit', function(code, signal)  {
-		console.log('spawn_pipe_http: signal(' + signal + ')');
-		if (signal=='SIGUSR2') {
-			res.write('timeout');
+		try {
+			console.log('spawn_pipe_http: signal(' + signal + ')');
+			if (signal=='SIGUSR2') {
+				res.write('timeout');
+			}
+			if (timer) clearTimeout(timer);
+			res.end();
+		} catch(e) {
+			console.log(e);
 		}
-		if (timer) clearTimeout(timer);
-		res.end();
 	});
 	req.connection.on('end', function() {
 		console.log('req connection end');
@@ -79,9 +85,9 @@ function spawn_pipe_http(req, res, cmd, args, time) {
 	return process;
 }
 
-function iconv_encode(str, from, to) {
-	//var iconv = new Iconv(from, to + '//IGNORE');
-	return iconv.convert(str);
+function iconv_encode(buff, from, to) {
+	var str = buff.toString(from);
+	return iconv.encode(str, to + '//IGNORE');
 }
 
 router.get('/', function(req, res) {
@@ -345,11 +351,20 @@ router.post('/nslookup', function(req, res) {
 		return;
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
-<<<<<<< Updated upstream
 	spawn_pipe_http(req, res, "nslookup", [host], 10000);
-=======
+});
+
+router.post('/dig', function(req, res) {
+	var host = req.body['host'];
+
+	//res.writeHead(200, {'Content-Type': 'text/plain'});
+	if (!host) {
+		res.write('error: input host');
+		res.end();
+		return;
+	}
+	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
 	spawn_pipe_http(req, res, "dig", [host], 30000);
->>>>>>> Stashed changes
 });
 
 router.post('/whois', function(req, res) {
@@ -362,12 +377,19 @@ router.post('/whois', function(req, res) {
 		return;
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
-<<<<<<< Updated upstream
-	spawn_pipe_http(req, res, "whois", [host], 10000);
-=======
 	//spawn_pipe_http(req, res, "whois", [host], 30000);
 	spawn_pipe_http(req, res, "wget", ['http://whois.nic.or.kr/kor/whois.jsc', '--post-data=query=heyo.me', '-qO-'], 30000);
->>>>>>> Stashed changes
+	request.post('https://whois.kisa.or.kr/kor/whois.jsc', {form:{query:host}}, function(e, r, body) {
+		var re = /<pre[^>]+>([\s\S]+)<\/pre>/g;
+		var matches = re.exec(body);
+		if (matches) {
+			body = matches[1];
+		}
+		body = body.replace(/<script[^>]+>([\s\S]+)<\/script>/gi, '');
+		body = body.replace(/<[/]?[^>]+>/g, '');
+		res.write(body);
+		res.end();
+	});
 });
 
 router.post('/geoip', function(req, res) {
@@ -429,5 +451,12 @@ router.post('/linkshort', function(req, res) {
 	}
 });
 
+router.post('/jsbeautify', function(req, res) {
+	var data = req.body['data'];
+
+	var output = beautify(data, { indent_size: 4 });
+	res.write(output);
+	res.end();
+});
 
 module.exports = router;
