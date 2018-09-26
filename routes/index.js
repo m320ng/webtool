@@ -85,9 +85,12 @@ function spawn_pipe_http(req, res, cmd, args, time) {
 	return process;
 }
 
-function iconv_encode(buff, from, to) {
-	var str = buff.toString(from);
-	return iconv.encode(str, to + '//IGNORE');
+function iconv_encode(str, encoding) {
+	return iconv.encode(str, encoding);
+}
+
+function iconv_decode(buff, encoding) {
+	return iconv.decode(buff, encoding);
 }
 
 router.get('/', function(req, res) {
@@ -122,7 +125,7 @@ router.post('/encode', function(req, res) {
 	try {
 		var buff = null;
 		if (encoding=='euckr') {
-			buff = iconv_encode(plain, 'utf-8', encoding);
+			buff = iconv_encode(plain, 'cp949');
 		} else if (encoding=='utf8') {
 			buff = new Buffer(plain);
 		} else if (encoding=='binfile') {
@@ -196,7 +199,7 @@ router.post('/decode', function(req, res) {
 		}
 
 		if (encoding=='euckr') {
-			result = iconv_encode(buff, encoding, 'utf-8').toString();
+			result = iconv_decode(buff, 'cp949').toString();
 		} else if (encoding=='utf8') {
 			result = buff.toString();
 		} else if (encoding=='binfile') {
@@ -378,7 +381,7 @@ router.post('/whois', function(req, res) {
 	}
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
 	//spawn_pipe_http(req, res, "whois", [host], 30000);
-	spawn_pipe_http(req, res, "wget", ['http://whois.nic.or.kr/kor/whois.jsc', '--post-data=query=heyo.me', '-qO-'], 30000);
+	//spawn_pipe_http(req, res, "wget", ['http://whois.nic.or.kr/kor/whois.jsc', '--post-data=query=heyo.me', '-qO-'], 30000);
 	request.post('https://whois.kisa.or.kr/kor/whois.jsc', {form:{query:host}}, function(e, r, body) {
 		var re = /<pre[^>]+>([\s\S]+)<\/pre>/g;
 		var matches = re.exec(body);
