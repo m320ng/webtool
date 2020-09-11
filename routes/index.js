@@ -12,8 +12,8 @@ var beautify = require('js-beautify').js_beautify;
 var google = require('googleapis');
 /*
 var OAuth2 = google.auth.OAuth2;
-var CLIENT_ID = '129252659172-atrukhe89ukegeevpg44np7tpddi3br4.apps.googleusercontent.com';
-var CLIENT_SECRET = 'wmEpjkaH7LHKDvWv-HWRCEKy';
+var CLIENT_ID = '129252659172-atregeevpg44np7tpddi3br4.apps.googleusercontent.com';
+var CLIENT_SECRET = 'KDvWv-HWRCEKy';
 var REDIRECT_URL = 'urn:ietf:wg:oauth:2.0:oob';
 var oauth2Client = new OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
 var scopes = [
@@ -106,6 +106,16 @@ router.get('/', function(req, res) {
 	locals.hashes = crypto.getHashes();
 
 	res.render('index', locals);
+});
+
+router.get('/ip', function(req, res) {
+	var webinfo = {
+		ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+		agent: req.headers['user-agent']
+	};
+
+
+	res.json(webinfo);
 });
 
 router.post('/uploadify', function(req, res) {
@@ -382,7 +392,7 @@ router.post('/whois', function(req, res) {
 	host = host.replace(/^[-]+/g, '').replace(/[^0-9a-zA-Z.-]/g, '');
 	//spawn_pipe_http(req, res, "whois", [host], 30000);
 	//spawn_pipe_http(req, res, "wget", ['http://whois.nic.or.kr/kor/whois.jsc', '--post-data=query=heyo.me', '-qO-'], 30000);
-	request.post('https://whois.kisa.or.kr/kor/whois.jsc', {form:{query:host}}, function(e, r, body) {
+	request.post('https://xn--c79as89aj0e29b77z.xn--3e0b707e/kor/whois.jsc', {form:{query:host}}, function(e, r, body) {
 		var re = /<pre[^>]+>([\s\S]+)<\/pre>/g;
 		var matches = re.exec(body);
 		if (matches) {
